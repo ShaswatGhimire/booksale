@@ -1,0 +1,183 @@
+{% extends 'store/layout.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="box-element" id="form-wrapper">
+            <form id="form">
+                <div id="user-info">
+                    <div class="form-field">
+                        <input required class="form-control" type="text" name="name" placeholder="Name..">
+                    </div>
+                    <div class="form-field">
+                        <input required class="form-control" type="email" name="email" placeholder="Email..">
+                    </div>
+                </div>
+                
+                <div id="shipping-info">
+                    <hr>
+                    <p>Shipping Information:</p>
+                    <hr>
+                    <div class="form-field">
+                        <input required class="form-control" type="text" name="cellno2" placeholder="Contact No..">
+                    </div><br>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="country" placeholder="Country..">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="state" placeholder="State..">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="city" placeholder="City..">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="address" placeholder="Address..">
+                    </div>
+                    <div class="form-field">
+                        <input class="form-control" type="text" name="zipcode" placeholder="Zip code..(if any)">
+                    </div>
+                    <br>
+                    <br>
+                    <p style="font-size: small;color: red;">* Contact No.. field should not be empty and should be valid</p>
+                </div>
+
+                <hr>
+                <input id="form-button" class="btn btn-success btn-block" type="submit" value="Continue">
+            </form>
+        </div>
+
+        <br>
+        <div class="box-element hidden" id="payment-info">
+            <strong>Payment Options : Cash on Delivey</strong><br>
+            <small>press continue to give order now</small><br>
+            <button id="make-payment"  class="btn btn-success">Continue</button>
+        </div>
+
+    </div>
+
+    <div class="col-lg-6">
+        <div class="box-element">
+            <a  class="btn btn-outline-dark" href="{% url 'cart' %}">&#x2190; Back to Cart</a>
+            <hr>
+            <h3>Order Summary</h3>
+            <hr>
+            {% for item in items %}
+            <div class="cart-row">
+                <div style="flex:2"><img class="row-image" src="{{item.product.imageURL}}"></div>
+                <div style="flex:2"><p>{{item.product.name}}</p></div>
+                <div style="flex:1"><p>Rs {{item.product.price}}</p></div>
+                <div style="flex:1"><p>x{{item.quantity}}</p></div>
+            </div>
+            {% endfor %}
+            <h5>Items:   {{order.get_cart_items}}</h5>
+            <h5>Total:   Rs {{order.get_cart_total}}</h5>
+        </div>
+        <hr>
+        <div class="cart-row">
+        <form action="https://uat.esewa.com.np/epay/main" method="POST">
+            <input value="500" name="tAmt" type="hidden">
+            <input value="90" name="amt" type="hidden">
+            <input value="5" name="txAmt" type="hidden">
+            <input value="2" name="psc" type="hidden">
+            <input value="3" name="pdc" type="hidden">
+            <input value="EPAYTEST" name="scd" type="hidden">
+            <input value="ee2c3ca1-696b-4cc5-a6be-2c40d929d453" name="pid" type="hidden">
+            <input value="http://merchant.com.np/page/esewa_payment_success?q=su" type="hidden" name="su">
+            <input value="http://merchant.com.np/page/esewa_payment_failed?q=fu" type="hidden" name="fu">
+            <input  class = "row-image" value="" src="{% static 'images/esewa.jpg' %}" type="image">
+        </form>
+        &nbsp;&nbsp;
+        <input  class = "row-image" style="float: right;" src="{% static 'images/cashondelivery.jpeg' %}" type="image">
+    </div>
+
+        
+    </div>
+</div>
+
+<script type = "text/javascript">
+    var shipping = '{{order.shipping}}'
+    var total = '{{order.get_cart_total}}'
+
+    if (shipping == 'False'){
+        document.getElementById('shipping-info').innerHTML = ''
+    }
+
+    if (user != 'AnonymousUser'){
+        document.getElementById('user-info').innerHTML=''
+    }
+
+    if (shipping == 'False' && user != 'AnonymousUser'){
+        document.getElementById('form-wrapper').classList.add("hidden");
+        document.getElementById('payment-info').classList.remove("hidden");
+    }
+
+    var form = document.getElementById('form')
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault()
+        console.log('form submitted...')
+        document.getElementById('form-button').classList.add('hidden')
+        document.getElementById('payment-info').classList.remove('hidden')
+    })
+
+    document.getElementById('make-payment').addEventListener('click', function(e){
+        submitFormData()
+    })
+
+    function submitFormData(){
+        console.log('payment button clicked')
+
+        var userFormData = {
+            'name': null,
+            'email': null,
+            'total': total
+        }
+
+        
+        var shippingInfo = {
+            'address': null,
+            'city': null,
+            'cellno': null,
+            'country': null,
+            'state': null,
+            'zipcode': null,
+            'total': total
+        }
+
+        if (shipping != 'False'){
+            shippingInfo.address =form.address.value
+            shippingInfo.city =form.city.value
+            shippingInfo.cellno2 =form.cellno2.value
+            shippingInfo.country =form.country.value
+            shippingInfo.state =form.state.value
+            shippingInfo.zipcode =form.zipcode.value
+        }
+
+        if (user == 'AnonymousUser'){
+            userFormData.name =form.name.value
+            userFormData.email =form.email.value
+        }
+
+        var url = '/process_order/'
+        fetch(url,{
+            method:'POST',
+            headers : {
+            'Content-Type':'application/json',
+            'X-CSRFToken': csrftoken,
+        },
+            body : JSON.stringify({'form': userFormData, 'shipping':shippingInfo})
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success:', data);
+            alert('ORDER COMPLETED!!! WILL BE DELIVERED SHORTLY');
+            cart = {}
+            document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+            window.location.href = "{% url 'store' %}"
+
+        }) 
+    }
+</script>
+{% endblock content%}

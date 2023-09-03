@@ -1,0 +1,47 @@
+{% extends 'store/layout.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="row">
+    <div class="sidebar col-lg-2 col-md-3">
+        <h6>Filter By:</h6>
+        {% for categ in categories %}
+        <p><a href="{% url 'categ' categ.name %}">{{categ.name}}</a></p>
+        {% endfor %}
+    </div>
+
+<div class="main col-lg-10 col-md-9">
+    <div class="container">    
+        <div class="row">    
+            {% for product in products %}
+            <div class="col-lg-4">
+                <img class="thumbnail"  src="{{product.imageURL}}">
+                <div class="box-element product">
+                    <h6><strong>{{product.name}}</strong></h6>
+                    <hr>
+                    <button  data-product={{product.id}} data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                    <a href="{% url 'detail' product.id%}" class="btn btn-outline-success">View</a>
+                    {% if product.discount_percent is not None %} 
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span style="display: inline-end; font-size:large; text-align: right;">
+                            <del>Rs {{product.first_price}}</del>
+                            &nbsp;
+                            <span style="color: red;">-{{product.discount_percent}}%</span>
+                        </span>   
+                        <h6 style = "display: block;float: right; font-size: large;">Rs {{product.price|floatformat:2}}</h6>    
+                    {% else %}
+                        <h6 style = "display: block;float: right;font-size: large ">Rs {{product.price|floatformat:2}}</h6>
+                    {% endif %}
+                    
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock content%}
+

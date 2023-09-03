@@ -1,0 +1,37 @@
+{% extends 'store/layout.html' %}
+{% load static %}
+
+
+{% block content %}
+<div class="row">
+    <div class="sidebar col-lg-2 col-md-3">
+        <h6>Filter By:</h6>
+        {% for categ in categories %}
+        <p><a href="{% url 'categ' categ.name %}">{{categ.name}}</a></p>
+        {% endfor %}
+    </div>
+
+    <div class="main col-lg-10 col-md-9">
+    <i><h6>Filter by Category : {{name}}</h6></i>
+    <div class="container">    
+        <div class="row">    
+            {% for product in products %}
+                {% if product.category.name == name %}
+                    <div class="col-lg-4">
+                        <img class="thumbnail"  src="{{product.imageURL}}">
+                        <div class="box-element product">
+                            <h6><strong>{{product.name}}</strong></h6>
+                            <hr>
+                            <button  data-product={{product.id}} data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                            <a href="{% url 'detail' product.id%}" class="btn btn-outline-success">View</a>
+                            <h4 style = "display: block; float: right;">Rs {{product.price|floatformat:2}}</h4>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock content%}
+

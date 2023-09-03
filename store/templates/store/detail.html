@@ -1,0 +1,67 @@
+{% extends 'store/layout.html' %}
+{% load static %}
+
+
+{% block content %}   
+<div class="row">
+    <div class="sidebar col-lg-2 col-md-3">
+        <h6>Filter By:</h6>
+        {% for categ in categories %}
+        <p><a href="{% url 'categ' categ.name %}">{{categ.name}}</a></p>
+        {% endfor %}
+    </div>
+
+    <div class="main col-lg-10 col-md-9">
+     
+
+        <div>
+            <img style="width: 60%;
+            height: 300px;
+            -webkit-box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);
+            -moz-box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);
+            box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);"  src="{{item.imageURL}}">
+            <div class="box-element product">
+                <h6><strong>{{item.name}}</strong></h6>
+                <hr>
+                <h4 style="display: inline-block;">Rs {{item.price|floatformat:2}}</h4>&nbsp;&nbsp;
+                {% if item.discount_percent is not None %} 
+                <del>Rs {{item.first_price}}</del>
+                            &nbsp;
+                            <span style="color: red;">-{{item.discount_percent}}%</span> 
+                {% endif %}
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <button  data-product={{item.id}} data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <a href="{% url 'cart' %}" class="btn btn-outline-success">My cart / Buy now</a>
+                
+            </div>
+
+        </div>   
+        <hr>
+        
+
+    <i><h6>Similar Searches : </h6></i>
+    <div class="container">    
+        <div class="row">    
+            {% for product in products %}
+                {% if product.category.name == item.category.name %}
+                    {% if product.name != item.name %}
+                    <div class="col-lg-4">
+                        <img class="thumbnail"  src="{{product.imageURL}}">
+                        <div class="box-element product">
+                            <h6><strong>{{product.name}}</strong></h6>
+                            <hr>
+                            <button  data-product={{product.id}} data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                            <a href="{% url 'detail' product.id%}" class="btn btn-outline-success">View</a>
+                            <h4 style = "display: block; float: right;">Rs {{product.price|floatformat:2}}</h4>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+</div>
+
+
+{% endblock content%}
